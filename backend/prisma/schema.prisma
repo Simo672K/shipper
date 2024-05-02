@@ -12,3 +12,39 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  DISPATCHER
+  DRIVER
+  SHIPPER
+}
+
+model Access {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role    Role
+  Profile Profile?
+}
+
+model User {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  email          String
+  phoneNumber    String
+  hashedPassword String
+  verified       Boolean
+  isActive       Boolean
+  createdAt      DateTime
+  lastLogin      DateTime
+}
+
+model Profile {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name    String
+  Access  Access @relation(fields: [role_id], references: [id])
+  role_id String @unique @db.Uuid
+}
+
+model Trip {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+}
