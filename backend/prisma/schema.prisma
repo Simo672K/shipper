@@ -20,6 +20,13 @@ enum Role {
   SHIPPER
 }
 
+enum Status {
+  PENDING
+  IN_PROGRESS
+  FINISHED
+  REJECTED
+}
+
 model Access {
   id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   role    Role
@@ -27,13 +34,15 @@ model Access {
 }
 
 model User {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String
   email          String
   phoneNumber    String
   hashedPassword String
   verified       Boolean
   isActive       Boolean
+  placedOrder    TripOrder[]
+  assignedOrder  TripOrderAssigned[]
   createdAt      DateTime
   lastLogin      DateTime
 }
@@ -45,6 +54,36 @@ model Profile {
   role_id String @unique @db.Uuid
 }
 
-model Trip {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+model TripPack {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  discription String @db.Text
+  pricing     Float
+  typeVehicle String
 }
+
+model TripOrder {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assignedToUser TripOrderAssigned?
+  fromAddress    String
+  toAddress      String
+  PlacedByUser   User               @relation(fields: [placedBy], references: [id])
+  placedBy       String             @unique @db.Uuid
+  status         Status             @default(PENDING)
+  createdAt      DateTime
+}
+
+model TripOrderAssigned {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  TripOrder TripOrder @relation(fields: [orderId], references: [id])
+  orderId   String    @unique @db.Uuid
+
+  AssignedTo User   @relation(fields: [assignedTo], references: [id])
+  assignedTo String @unique @db.Uuid
+}
+
+// model Vehicle {
+//   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+// }
