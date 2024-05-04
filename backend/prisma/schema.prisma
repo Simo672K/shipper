@@ -38,6 +38,7 @@ model User {
   name           String
   email          String
   phoneNumber    String
+  address        Address?
   hashedPassword String
   verified       Boolean
   isActive       Boolean
@@ -54,6 +55,21 @@ model Profile {
   role_id String @unique @db.Uuid
 }
 
+model Address {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User       User?      @relation(fields: [userId], references: [id])
+  userId     String?    @unique @db.Uuid
+  name       String
+  street     String
+  postalCode String
+  city       String
+  lang       Float
+  lat        Float
+  tripStart  TripOrder? @relation("startLocation")
+  tripEnd    TripOrder? @relation("endLocation")
+  createdAt  DateTime
+}
+
 model TripPack {
   id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
@@ -65,8 +81,10 @@ model TripPack {
 model TripOrder {
   id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   assignedToUser TripOrderAssigned?
-  fromAddress    String
-  toAddress      String
+  fromAddress    Address?           @relation("startLocation", fields: [fromAddressId], references: [id])
+  fromAddressId  String?            @unique @db.Uuid
+  toAddress      Address?           @relation("endLocation", fields: [toAddressId], references: [id])
+  toAddressId    String?            @unique @db.Uuid
   PlacedByUser   User               @relation(fields: [placedBy], references: [id])
   placedBy       String             @unique @db.Uuid
   status         Status             @default(PENDING)
