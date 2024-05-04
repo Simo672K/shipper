@@ -44,7 +44,7 @@ model User {
   isActive       Boolean
   placedOrder    TripOrder[]
   assignedOrder  TripOrderAssigned[]
-  createdAt      DateTime
+  createdAt      DateTime            @default(now())
   lastLogin      DateTime
 }
 
@@ -67,15 +67,15 @@ model Address {
   lat        Float
   tripStart  TripOrder? @relation("startLocation")
   tripEnd    TripOrder? @relation("endLocation")
-  createdAt  DateTime
+  createdAt  DateTime   @default(now())
 }
 
 model TripPack {
-  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
-  discription String @db.Text
+  discription String       @db.Text
   pricing     Float
-  typeVehicle String
+  typeVehicle TypeVehicle?
 }
 
 model TripOrder {
@@ -88,7 +88,7 @@ model TripOrder {
   PlacedByUser   User               @relation(fields: [placedBy], references: [id])
   placedBy       String             @unique @db.Uuid
   status         Status             @default(PENDING)
-  createdAt      DateTime
+  createdAt      DateTime           @default(now())
 }
 
 model TripOrderAssigned {
@@ -99,9 +99,23 @@ model TripOrderAssigned {
 
   AssignedTo User   @relation(fields: [assignedTo], references: [id])
   assignedTo String @unique @db.Uuid
+
+  createdAt DateTime @default(now())
 }
 
-// model Vehicle {
-//   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+model TypeVehicle {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  size         String
+  loadCapacity String
+  Trip         TripPack  @relation(fields: [tripPackId], references: [id])
+  tripPackId   String    @unique @db.Uuid
+  createdAt    DateTime  @default(now())
+  Vehicules    Vehicle[]
+}
 
-// }
+model Vehicle {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Type      TypeVehicle @relation(fields: [typeId], references: [id])
+  typeId    String      @db.Uuid
+  createdAt DateTime    @default(now())
+}
