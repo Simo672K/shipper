@@ -117,5 +117,20 @@ model Vehicle {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   Type      TypeVehicle @relation(fields: [typeId], references: [id])
   typeId    String      @db.Uuid
+  Model     Model?
   createdAt DateTime    @default(now())
 }
+
+model Model {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brand       String
+  brandSerie  String
+  releaseDate DateTime @db.Date
+  Vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId   String   @unique @db.Uuid
+  createdAt   DateTime @default(now())
+}
+
+// model Maintenance {
+//   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+// }
