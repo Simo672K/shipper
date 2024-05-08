@@ -1,4 +1,10 @@
-declare namespace core {
+namespace core {
+  interface AuthType {
+    prisma: PrismaClient;
+    authenticate: (email: string, password: string) => [boolean, any];
+    register: () => void;
+  }
+
   interface TripType {
     title: string;
     startLocation: string;
