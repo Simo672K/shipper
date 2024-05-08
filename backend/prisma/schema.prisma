@@ -36,7 +36,7 @@ model Access {
 model User {
   id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String
-  email          String
+  email          String              @unique
   phoneNumber    String
   address        Address?
   hashedPassword String
