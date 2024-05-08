@@ -40,7 +40,7 @@ model User {
   phoneNumber    String
   address        Address?
   hashedPassword String
-  verified       Boolean
+  verified       Boolean             @default(false)
   isActive       Boolean
   placedOrder    TripOrder[]
   assignedOrder  TripOrderAssigned[]
