@@ -7,7 +7,7 @@ type ConfObj = {
 const urlConfig: ConfObj = {
   baseUrl: "/api/v1",
   AUTH_URL: "/api/v1/auth",
-  USERS_URL: "/api/v1/users",
+  USERS_URL: "/api/v1/user",
 };
 
 export default urlConfig;

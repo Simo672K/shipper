@@ -9,11 +9,11 @@ import conf from "../config/config";
 config();
 
 // global constants
-const userRouter = Router();
+const authRouter = Router();
 const url = conf.AUTH_URL;
 const prisma = PrismaSingleton.getPrisma();
 
-userRouter.post(`${url}/login`, async (req, res) => {
+authRouter.post(`${url}/login`, async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await prisma.user.findUnique({
@@ -25,19 +25,20 @@ userRouter.post(`${url}/login`, async (req, res) => {
     if (user) {
       const isLigit = await bcrypt.compare(password, user.hashedPassword);
       if (isLigit) {
-        const acessToken = jwt.sign(
+        const accessToken = jwt.sign(
           { name: user.name, email: user.email },
           process.env.ACCESS_TOKEN!
         );
-        res.send({ message: "Authenticated successfully", acessToken });
+        res.send({ accessToken });
       }
-    } else res.status(401).send({ message: "Failed to authenticate" });
+    }
+    res.status(401).send({ message: "Failed to authenticate" });
   } catch (err) {
     res.status(500).send();
   }
 });
 
-userRouter.post(`${url}/register`, async (req, res) => {
+authRouter.post(`${url}/register`, async (req, res) => {
   const { name, email, phoneNumber, password, isActive, lastLogin } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -60,4 +61,4 @@ userRouter.post(`${url}/register`, async (req, res) => {
   }
 });
 
-export default userRouter;
+export default authRouter;
