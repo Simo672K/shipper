@@ -10,11 +10,11 @@ import AuthController from "../controllers/auth.controller";
 config();
 
 // global constants
-const authRouter = Router();
+const authRoutes = Router();
 const url = conf.AUTH_URL;
 const prisma = PrismaSingleton.getPrisma();
 
-authRouter.post(`${url}/login`, async (req, res) => {
+authRoutes.post(`${url}/login`, async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
     return res.status(400).send({ message: "All fields are required" });
@@ -31,7 +31,7 @@ authRouter.post(`${url}/login`, async (req, res) => {
   }
 });
 
-authRouter.post(`${url}/register`, async (req, res) => {
+authRoutes.post(`${url}/register`, async (req, res) => {
   const { name, email, phoneNumber, password, isActive, lastLogin, profileId } =
     req.body;
   try {
@@ -56,4 +56,32 @@ authRouter.post(`${url}/register`, async (req, res) => {
   }
 });
 
-export default authRouter;
+authRoutes.post(`${url}/refresh-token`, async (req, res) => {
+  const { refreshToken } = req.body;
+  try {
+    const isValidToken = await prisma.token.findUnique({
+      where: { token: refreshToken },
+      select: { token: true, expired: true },
+    });
+    if (isValidToken) {
+      jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN!,
+        async (err: any, user: any) => {
+          if (err) return res.sendStatus(403);
+          const newCredentials = await AuthController.refreshJWTCredetials(
+            refreshToken,
+            user.name,
+            user.email,
+            user.role
+          );
+          res.status(200).send(newCredentials);
+        }
+      );
+    }
+  } catch (err) {}
+});
+
+authRoutes.get(`${url}/refresh-token`, () => {});
+
+export default authRoutes;

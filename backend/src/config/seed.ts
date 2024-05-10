@@ -26,8 +26,21 @@ const access: Array<AccessType> = [
   },
 ];
 
+const adminData = {
+  name: "Admin User",
+  email: "test@email.com",
+  phoneNumber: "phone",
+  profileId: "865b2393-55c0-453f-a2b2-f13cdf3f4ab3",
+  hashedPassword:
+    "$2b$10$vb5v.PuO1zsKIIw2LPO5uukeaI8yteLHoQ4XRx/WBRoU5U3QDrSs6",
+  verified: true,
+  isActive: true,
+  lastLogin: "2024-05-08T18:41:12Z",
+};
+
 const profiles = [
   {
+    id: "865b2393-55c0-453f-a2b2-f13cdf3f4ab3",
     name: "admin",
     role_id: "adc563d4-369c-4bf3-9b35-d20c669c04b7",
   },
@@ -45,10 +58,16 @@ const profiles = [
   },
 ];
 async function seed() {
-  await prisma.access.createMany({ data: access });
-  await prisma.profile.createMany({ data: profiles });
-  console.log("[*] Access data seeded successfully!");
-  console.log("[*] Profiles data seeded successfully!");
+  try {
+    await prisma.access.createMany({ data: access });
+    await prisma.profile.createMany({ data: profiles });
+    await prisma.user.create({ data: adminData });
+    console.log("[*] Access data seeded successfully!");
+    console.log("[*] Profiles data seeded successfully!");
+    console.log("[*] Admin data seeded successfully!");
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 seed();

@@ -6,10 +6,14 @@ import bcrypt from "bcrypt";
 class AuthController {
   private static prisma: PrismaClient = PrismaSingleton.getPrisma();
 
-  private static async createJWTCredentials(name: string, email: string) {
+  private static async createJWTCredentials(
+    name: string,
+    email: string,
+    role: string
+  ) {
     try {
-      const accessToken = genrateAccessToken(name, email);
-      const refreshToken = refreshAccessToken(name, email);
+      const accessToken = genrateAccessToken(name, email, role);
+      const refreshToken = refreshAccessToken(name, email, role);
 
       const isTokenStored = await this.prisma.token.create({
         data: {
@@ -23,20 +27,37 @@ class AuthController {
     }
   }
 
+  static async refreshJWTCredetials(
+    refreshToken: string,
+    name: string,
+    email: string,
+    role: string
+  ) {
+    const accessToken = genrateAccessToken(name, email, role);
+    return { accessToken, refreshToken };
+  }
+
   static async authenticate(email: string, password: string) {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
           email: email,
         },
-        select: { name: true, hashedPassword: true, email: true },
+        include: {
+          Profile: {
+            include: {
+              Access: true,
+            },
+          },
+        },
       });
       if (user) {
         const isLigit = await bcrypt.compare(password, user.hashedPassword);
         if (isLigit) {
           const jwtCredentials = this.createJWTCredentials(
             user.name,
-            user.email
+            user.email,
+            user.Profile.Access.role
           );
           return [isLigit, jwtCredentials];
         }
