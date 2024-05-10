@@ -7,10 +7,20 @@ class AuthController {
   private static prisma: PrismaClient = PrismaSingleton.getPrisma();
 
   private static async createJWTCredentials(name: string, email: string) {
-    const accessToken = genrateAccessToken(name, email);
-    const refreshToken = refreshAccessToken(name, email);
+    try {
+      const accessToken = genrateAccessToken(name, email);
+      const refreshToken = refreshAccessToken(name, email);
 
-    return { accessToken, refreshToken };
+      const isTokenStored = await this.prisma.token.create({
+        data: {
+          token: refreshToken,
+        },
+      });
+      if (isTokenStored) return { accessToken, refreshToken };
+      throw new Error("Internal error, Failed to store refresh token!");
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   static async authenticate(email: string, password: string) {

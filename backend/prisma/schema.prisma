@@ -27,6 +27,12 @@ enum Status {
   REJECTED
 }
 
+model Token {
+  token     String   @id @unique
+  expired   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model Access {
   id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   role    Role
@@ -38,6 +44,8 @@ model User {
   name           String
   email          String              @unique
   phoneNumber    String
+  Profile        Profile             @relation(fields: [profileId], references: [id])
+  profileId      String              @db.Uuid
   address        Address?
   hashedPassword String
   verified       Boolean             @default(false)
@@ -51,6 +59,7 @@ model User {
 model Profile {
   id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name    String
+  Users   User[]
   Access  Access @relation(fields: [role_id], references: [id])
   role_id String @unique @db.Uuid
 }
