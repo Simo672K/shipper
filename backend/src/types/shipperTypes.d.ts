@@ -1,9 +1,5 @@
 namespace core {
-  interface AuthType {
-    prisma: PrismaClient;
-    authenticate: (email: string, password: string) => [boolean, any];
-    register: () => void;
-  }
+  type Role = ["ADMIN", "DRIVER", "SHIPPER", "DISPATCHER"];
 
   interface TripType {
     title: string;
