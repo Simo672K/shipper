@@ -35,18 +35,14 @@ authRoutes.post(`${url}/register`, async (req, res) => {
   const { name, email, phoneNumber, password, isActive, lastLogin, profileId } =
     req.body;
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        phoneNumber,
-        hashedPassword,
-        isActive,
-        profileId,
-        lastLogin,
-        verified: false,
-      },
+    const newUser = await AuthController.register({
+      name,
+      email,
+      phoneNumber,
+      password,
+      isActive,
+      lastLogin,
+      profileId,
     });
     if (newUser) res.status(201).send({ message: "User created successfully" });
     else throw new Error();
@@ -63,7 +59,7 @@ authRoutes.post(`${url}/refresh-token`, async (req, res) => {
       where: { token: refreshToken },
       select: { token: true, expired: true },
     });
-    if (isValidToken) {
+    if (!isValidToken?.expired) {
       jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN!,
@@ -78,10 +74,21 @@ authRoutes.post(`${url}/refresh-token`, async (req, res) => {
           res.status(200).send(newCredentials);
         }
       );
-    }
-  } catch (err) {}
+    } else throw new Error("Invalid Token");
+  } catch (err) {
+    console.log(err);
+    res.status(401).send({ message: "Invalid Token" });
+  }
 });
 
-authRoutes.get(`${url}/refresh-token`, () => {});
+authRoutes.get(`${url}/logout`, async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    await AuthController.logout(refreshToken);
+    res.sendStatus(204);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
 
 export default authRoutes;

@@ -68,7 +68,38 @@ class AuthController {
     }
   }
 
-  static async register() {}
+  static async register(data: any) {
+    const {
+      name,
+      email,
+      phoneNumber,
+      password,
+      isActive,
+      lastLogin,
+      profileId,
+    } = data;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await this.prisma.user.create({
+      data: {
+        name,
+        email,
+        phoneNumber,
+        hashedPassword,
+        isActive,
+        profileId,
+        lastLogin,
+        verified: false,
+      },
+    });
+    return newUser;
+  }
+
+  static async logout(refreshToken: string) {
+    await this.prisma.token.update({
+      where: { token: refreshToken },
+      data: { expired: true },
+    });
+  }
 }
 
 export default AuthController;

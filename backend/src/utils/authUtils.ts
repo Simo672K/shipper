@@ -8,7 +8,7 @@ function genrateAccessToken(name: string, email: string, role: string): string {
   const accessToken = jwt.sign(
     { name, email, role },
     process.env.ACCESS_TOKEN!,
-    { expiresIn: "15s" }
+    { expiresIn: 15 * 60 * 1000 }
   );
 
   return accessToken;
