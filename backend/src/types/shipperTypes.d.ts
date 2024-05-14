@@ -1,5 +1,5 @@
 namespace core {
-  type Role = ["ADMIN", "DRIVER", "SHIPPER", "DISPATCHER"];
+  type Role = "ADMIN" | "DRIVER" | "SHIPPER" | "DISPATCHER";
 
   interface TripType {
     title: string;

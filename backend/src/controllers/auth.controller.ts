@@ -94,9 +94,9 @@ class AuthController {
     return newUser;
   }
 
-  static async logout(refreshToken: string) {
+  static async logout(token: string) {
     await this.prisma.token.update({
-      where: { token: refreshToken },
+      where: { token },
       data: { expired: true },
     });
   }

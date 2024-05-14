@@ -1,19 +1,31 @@
 import { Request, Router } from "express";
 import authMiddleware from "../middleware/auth.middleware";
-import { PrismaSingleton } from "../lib/db";
 import { config } from "dotenv";
 import conf from "../config/config";
+import roleMiddleWare from "../middleware/role.middleware";
+
+interface UserRequest extends Request {
+  user?: any;
+}
 
 // Dotenv config
 config();
 
 // global constants
-const userRouter = Router();
+const userRoutes = Router();
 const url = conf.USERS_URL;
-const prisma = PrismaSingleton.getPrisma();
 
-userRouter.get(url, authMiddleware, (req: Request & { user?: any }, res) => {
+userRoutes.get(url, authMiddleware, (req: UserRequest, res) => {
   res.send({ message: "ok", user: req.user });
 });
 
-export default userRouter;
+userRoutes.get(
+  `${url}/order`,
+  authMiddleware,
+  roleMiddleWare(["SHIPPER"]),
+  (req: UserRequest, res) => {
+    res.send({ message: "ok", user: req.user });
+  }
+);
+
+export default userRoutes;

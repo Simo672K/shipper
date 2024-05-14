@@ -2,7 +2,6 @@ import { Router } from "express";
 import { PrismaSingleton } from "../lib/db";
 import { config } from "dotenv";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import conf from "../config/config";
 import AuthController from "../controllers/auth.controller";
 
