@@ -1,5 +1,7 @@
 import { PrismaSingleton } from "../lib/db";
+import { config } from "dotenv";
 
+config();
 const prisma = PrismaSingleton.getPrisma();
 
 interface AccessType {
@@ -70,4 +72,4 @@ async function seed() {
   }
 }
 
-seed();
+seed().then(async () => await prisma.$disconnect());

@@ -25,7 +25,7 @@ authRoutes.post(`${url}/login`, async (req, res) => {
       res.status(401).send({ message: "Invalid credentials" });
       break;
     default:
-      res.status(500).send();
+      res.status(403).send();
       break;
   }
 });

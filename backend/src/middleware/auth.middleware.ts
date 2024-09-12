@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+interface RequestWithUser extends Request {
+  user?: any;
+}
 
 function authMiddleware(
-  req: Request & { user?: any },
+  req: RequestWithUser,
   res: Response,
   next: NextFunction
 ) {

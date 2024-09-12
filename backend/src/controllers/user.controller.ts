@@ -4,31 +4,22 @@ import { PrismaClient } from "@prisma/client";
 class UserController {
   private static prisma: PrismaClient = PrismaSingleton.getPrisma();
 
-  private static async getUserAdress(userId: string) {
-    const userAddressData = await this.prisma.address.findUnique({
-      where: { userId },
-      select: {
-        name: true,
-        street: true,
-        postalCode: true,
-        city: true,
-      },
-    });
-    if (userAddressData) return userAddressData;
-    throw new Error("Invalid id or user doesn't have address");
-  }
-
-  static async getUserPersonalData(id: string) {
+  static async getUserPersonalData(email: string) {
     const userData = await this.prisma.user.findUnique({
-      where: { id },
+      where: { email },
       select: {
+        id: true,
         name: true,
         phoneNumber: true,
         email: true,
+        address: true,
       },
     });
-    const userAddress = await this.getUserAdress(id);
-    if (userData) return { ...userData, addressInfo: userAddress };
+    if (userData) return userData;
     throw new Error("Invalid User Id");
   }
+
+  static async getUserOrders(email: string) {}
 }
+
+export default UserController;

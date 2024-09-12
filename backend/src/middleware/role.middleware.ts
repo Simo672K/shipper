@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"; // Import required types
 
-function roleMiddleware(roles: any) {
+function roleMiddleware(roles: Array<"SHIPPER"|"ADMIN"|"DISPATCHER"|"DRIVER">) {
   // Use array for multiple roles
   return (req: Request & { user?: any }, res: Response, next: NextFunction) => {
     const user = req.user;

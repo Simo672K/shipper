@@ -1,30 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum Role {
-  ADMIN
-  DISPATCHER
-  DRIVER
-  SHIPPER
-}
-
-enum Status {
-  PENDING
-  IN_PROGRESS
-  FINISHED
-  REJECTED
+  provider  = "postgresql"
+  url       = env("DATABASE_URL_PROD")
+  directUrl = env("DATABASE_URL_DIRECT")
 }
 
 model Token {
@@ -40,33 +21,32 @@ model Access {
 }
 
 model User {
-  id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String
-  email          String              @unique
+  email          String             @unique
   phoneNumber    String
-  Profile        Profile             @relation(fields: [profileId], references: [id])
-  profileId      String              @db.Uuid
-  address        Address?
+  profileId      String             @db.Uuid
   hashedPassword String
-  verified       Boolean             @default(false)
+  verified       Boolean            @default(false)
   isActive       Boolean
-  placedOrder    TripOrder[]
-  assignedOrder  TripOrderAssigned[]
-  createdAt      DateTime            @default(now())
+  createdAt      DateTime           @default(now())
   lastLogin      DateTime
+  address        Address?
+  placedOrder    TripOrder?
+  assignedOrder  TripOrderAssigned?
+  Profile        Profile            @relation(fields: [profileId], references: [id])
 }
 
 model Profile {
   id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name    String
-  Users   User[]
-  Access  Access @relation(fields: [role_id], references: [id])
   role_id String @unique @db.Uuid
+  Access  Access @relation(fields: [role_id], references: [id])
+  Users   User[]
 }
 
 model Address {
   id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  User       User?      @relation(fields: [userId], references: [id])
   userId     String?    @unique @db.Uuid
   name       String
   street     String
@@ -74,60 +54,58 @@ model Address {
   city       String
   lang       Float
   lat        Float
+  createdAt  DateTime   @default(now())
+  User       User?      @relation(fields: [userId], references: [id])
   tripStart  TripOrder? @relation("startLocation")
   tripEnd    TripOrder? @relation("endLocation")
-  createdAt  DateTime   @default(now())
 }
 
 model TripPack {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
-  discription String       @db.Text
+  discription String
   pricing     Float
   typeVehicle TypeVehicle?
 }
 
 model TripOrder {
   id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  assignedToUser TripOrderAssigned?
-  fromAddress    Address?           @relation("startLocation", fields: [fromAddressId], references: [id])
   fromAddressId  String?            @unique @db.Uuid
-  toAddress      Address?           @relation("endLocation", fields: [toAddressId], references: [id])
   toAddressId    String?            @unique @db.Uuid
-  PlacedByUser   User               @relation(fields: [placedBy], references: [id])
   placedBy       String             @unique @db.Uuid
   status         Status             @default(PENDING)
   createdAt      DateTime           @default(now())
+  fromAddress    Address?           @relation("startLocation", fields: [fromAddressId], references: [id])
+  PlacedByUser   User               @relation(fields: [placedBy], references: [id])
+  toAddress      Address?           @relation("endLocation", fields: [toAddressId], references: [id])
+  assignedToUser TripOrderAssigned?
 }
 
 model TripOrderAssigned {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  TripOrder TripOrder @relation(fields: [orderId], references: [id])
-  orderId   String    @unique @db.Uuid
-
-  AssignedTo User   @relation(fields: [assignedTo], references: [id])
-  assignedTo String @unique @db.Uuid
-
-  createdAt DateTime @default(now())
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId    String    @unique @db.Uuid
+  assignedTo String    @unique @db.Uuid
+  createdAt  DateTime  @default(now())
+  AssignedTo User      @relation(fields: [assignedTo], references: [id])
+  TripOrder  TripOrder @relation(fields: [orderId], references: [id])
 }
 
 model TypeVehicle {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   size         String
   loadCapacity String
-  Trip         TripPack  @relation(fields: [tripPackId], references: [id])
   tripPackId   String    @unique @db.Uuid
   createdAt    DateTime  @default(now())
+  Trip         TripPack  @relation(fields: [tripPackId], references: [id])
   Vehicules    Vehicle[]
 }
 
 model Vehicle {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  Type      TypeVehicle @relation(fields: [typeId], references: [id])
   typeId    String      @db.Uuid
-  Model     Model?
   createdAt DateTime    @default(now())
+  Model     Model?
+  Type      TypeVehicle @relation(fields: [typeId], references: [id])
 }
 
 model Model {
@@ -135,11 +113,21 @@ model Model {
   brand       String
   brandSerie  String
   releaseDate DateTime @db.Date
-  Vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
   vehicleId   String   @unique @db.Uuid
   createdAt   DateTime @default(now())
+  Vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
 }
 
-// model Maintenance {
-//   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-// }
+enum Role {
+  ADMIN
+  DISPATCHER
+  DRIVER
+  SHIPPER
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  FINISHED
+  REJECTED
+}
